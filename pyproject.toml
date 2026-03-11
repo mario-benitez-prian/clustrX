@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "clustrX"
+version = "0.1.0"
+description = "clustrX: graph-based clustering of sequences from BLAST, HMMER, or Diamond results."
+authors = [{ name = "Mario Benítez-Prián", email = "mario.benitezprian@gmail.com"}]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.8"
+keywords = ["bioinformatics", "clustering", "blast", "hmmer", "sequences", "graphs", "protein-families"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "polars>=0.19.0",
+    "igraph>=0.10.0",
+    "numpy>=1.20.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/mario-benitez-prian/clustrX"
+Repository = "https://github.com/mario-benitez-prian/clustrX"
+"Bug Tracker" = "https://github.com/mario-benitez-prian/clustrX/issues"
+
+[project.scripts]
+clustrx = "clustrx.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["clustrx"]

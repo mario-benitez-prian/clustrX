@@ -1,0 +1,34 @@
+name: Publish to PyPI
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  pypi-publish:
+    name: Build and upload to PyPI
+    runs-on: ubuntu-latest
+    
+    # REQUIRED: This allows the action to generate the Trusted Publisher OIDC token
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install build tool
+        run: pip install --upgrade build
+
+      - name: Build Source and Wheel distributions
+        run: python -m build
+
+      # The official PyPA action for Trusted Publishing
+      - name: Publish package to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

@@ -1,0 +1,5 @@
+#                                                                            --- full sequence --- -------------- this domain --------------   -----------         
+# target name        accession  tlen query name           accession  qlen   E-value  score  bias   #  of  c-Evalue  i-Evalue  score  bias  from    to  from    to  acc description of target
+#------------------- ---------- ----- -------------------- ---------- ----- --------- ------ ----- --- --- --------- --------- ------ ----- ----- ----- ----- ----- ---- ---------------------
+seq4                 -          100   queryC               -          100     1e-60  300.0   0.1   1   1     1e-60     1e-60  300.0   0.1     1   100     1   100   1   100 0.99 -
+seq5                 -          100   queryC               -          100     1e-05   80.0   0.1   1   1     1e-05     1e-05   80.0   0.1     1   100     1   100   1   100 0.99 -
