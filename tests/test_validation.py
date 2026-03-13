@@ -7,7 +7,7 @@ DATA_DIR = Path(__file__).parent / "data"
 def test_blast_file_as_hmmer():
     """Ensure passing a BLAST format file requesting HMMER format throws ValueError."""
     blast_file = DATA_DIR / "sample_blast.out"
-    with pytest.raises(ValueError, match="does not appear to be a valid HMMER tblout file"):
+    with pytest.raises(ValueError, match="does not appear to be a valid HMMER output"):
         read_hits(blast_file, format='hmmer')
 
 def test_hmmer_file_as_blast():
@@ -24,5 +24,5 @@ def test_invalid_custom_format(tmp_path):
     
     # But requesting columns 0,1,2,3 (which require at least 4 cols)
     custom_cols = {'q': 0, 't': 1, 'bitscore': 2, 'evalue': 3}
-    with pytest.raises(ValueError, match="fewer columns than your maximum requested index .*3"):
+    with pytest.raises(ValueError, match="fewer columns than requested"):
         read_hits(str(custom_file), format='custom', custom_cols=custom_cols)

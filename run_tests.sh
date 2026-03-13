@@ -6,4 +6,5 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 export PYTHONPATH="$DIR"
 
 # Ejecuta pytest usando el binario de tu conda env
+# Esto incluye: lógica base, formatos custom, filtros, HMMER y Rigor Científico.
 /home/mario/miniconda3/envs/amp_miner_env/bin/python3 -m pytest "$DIR/tests/" -v

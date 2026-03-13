@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "clustrX"
-version = "0.1.4"
-description = "clustrX: graph-based clustering of sequences from BLAST, HMMER, or Diamond results."
+version = "0.1.6"
+description = "clustrX: graph-based clustering using Leiden community detection algorithm of sequences from BLAST, HMMER or other sequence similarity search results"
 authors = [{ name = "Mario Benítez-Prián", email = "mario.benitezprian@gmail.com"}]
 license = { text = "MIT" }
 readme = "README.md"
 requires-python = ">=3.8"
-keywords = ["bioinformatics", "clustering", "blast", "hmmer", "sequences", "graphs", "protein-families"]
+keywords = ["bioinformatics", "clustering", "blast", "hmmer", "sequences", "graphs", "protein-families", "similarity-search", "sequence-clustering"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",

@@ -4,15 +4,25 @@ from pathlib import Path
 from .clustrx import read_hits, get_fasta_info, build_clusters, write_clusters
 
 def main():
+    """
+    Main entry point for the clustRX CLI.
+    
+    This function handles:
+    1. Argument parsing (BLAST/HMMER formats, filters, clustering parameters).
+    2. Sequence discovery and indexing from FASTA headers (Selective I/O).
+    3. Edge processing and graph-based clustering (Leiden algorithm).
+    4. Output generation (FASTA files and optional MSAs).
+    """
     parser = argparse.ArgumentParser(
         description=(
-        "clustRX: Cluster sequences from BLAST/HMMER outputs and generate FASTA groups.\n\n"
+        "clustRX: Parallel-ready sequence clustering with scientific rigor.\n\n"
+        "Leverages Polars for high-speed hit parsing and Igraph for community detection.\n"
         "Author: Mario Benítez-Prián | Please cite clustRX if used in your research.\n"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument("-i", "--input", required=True, help="Input hits file (BLAST tabular or HMMER tblout)")
-    parser.add_argument("-fmt", "--format", choices=["blast", "hmmer", "custom"], help="Input format (optional, auto-detected if not provided)")
+    parser.add_argument("-fmt", "--format", choices=["blast", "hmmer", "domhmmer", "tblhmmer", "mmseqs", "custom"], help="Input format (optional, auto-detected if not provided)")
     parser.add_argument("-f", "--fasta", required=True, help="FASTA file with all sequences")
     parser.add_argument("-min", "--min-cluster-size", type=int, default=2, help="Minimum cluster size to output (default=2).")
     parser.add_argument("-e", "--evalue", type=float, help="E-value threshold for filtering hits (default: no filter)")
@@ -32,7 +42,7 @@ def main():
     custom_group.add_argument("--col-bitscore", type=int, help="Column index for alignment score (bitscore)")
     custom_group.add_argument("--col-evalue", type=int, help="Column index for E-value")
     custom_group.add_argument("--col-pident", type=int, help="Column index for percentage identity")
-    custom_group.add_argument("--col-length", type=int, help="Column index for query length (used in dynamic coverage)")
+    custom_group.add_argument("--col-length", type=int, help="Column index for alignment length (used in dynamic coverage). Query and target lengths are extracted from the fasta file.")
     args = parser.parse_args()
 
     if args.mafft:
@@ -41,10 +51,12 @@ def main():
             print("Error: MAFFT is not installed or not found in system PATH. Please install it (e.g., 'sudo apt install mafft' or via Bioconda) to use the --mafft flag.")
             return
 
-    # ZERO-STRING: Read only names and lengths (very light)
+    # SELECTIVE I/O: Read only names and lengths to build the index.
+    # This is extremely memory-efficient and fast.
     names, lengths = get_fasta_info(args.fasta)
     
-    # Create an Enum for all sequence names
+    # PERFORMANCE HACK: Use Polars Enum for O(1) string matching.
+    # This maps sequence names to internal IDs for fast hit lookups.
     name_enum = pl.Enum(names)
     
     # Create the ID mapping and lengths DataFrames for Polars
@@ -106,8 +118,8 @@ def main():
         resolution=args.resolution
     )
 
-    # Write outputs (Need full sequences for FASTA generation)
-    # Lazy sequence loading only for final writing
+    # OUTPUT PHASE: Write clusters to disk.
+    # Only load the FULL sequences (ATGCs) here at the very end.
     from .clustrx import read_fasta
     sequences = read_fasta(args.fasta)
     
