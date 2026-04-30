@@ -1,6 +1,6 @@
 # clustrX: High-Performance Graph-Based Sequence Clustering
 
-[![Version](https://img.shields.io/badge/version-0.1.5-blue.svg)](https://test.pypi.org/project/clustrX/)
+[![Version](https://img.shields.io/badge/version-0.1.6-blue.svg)](https://pypi.org/project/clustrX/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
@@ -35,12 +35,10 @@ Traditional graph-based clustering often relies on *Single-Linkage*, where a sin
 
 ---
 
-## 🛠️ Installation
-
-Currently available on **TestPyPI**. You can install it using `pip`:
+Currently available on **PyPI**. You can install it using `pip`:
 
 ```bash
-pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ clustrX
+pip install clustrX
 ```
 
 ### Dependencies
@@ -51,14 +49,14 @@ pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://
 
 ## 📖 Quick Start
 
-### Basic Clustering (BLAST)
+### Basic Clustering (BLAST / MMseqs2 / Diamond)
 ```bash
-clustrx -i hits.blast -f sequences.fasta --format blast --outdir results
+clustrx -i hits.blast -f sequences.fasta --outdir results
 ```
 
 ### Advanced Scientific Clustering (HMMER + Dynamic Coverage)
 ```bash
-clustrx -i hits.domtblout -f sequences.fasta --format domhmmer --coverage dynamic --outdir results_hmmer
+clustrx -i hits.domtblout -f sequences.fasta --coverage dynamic --outdir results_hmmer
 ```
 
 ### Output Parameters
@@ -78,6 +76,8 @@ The scientific robustness of `clustrX` has been validated against Gold Standard 
 If you use **clustrX** in your research, please cite:
 > Benítez-Prián, M. (2024). clustrX: High-performance graph clustering for sequence similarity networks.
 
-## 👤 Author
-**Mario Benítez-Prián**  
-[mario.benitezprian@gmail.com](mailto:mario.benitezprian@gmail.com) | [GitHub](https://github.com/mario-benitez-prian)
+## 👤 Authors
+**Mario Benítez-Prián** & **Diego San Mauro**
+
+Contact: [mario.benitezprian@gmail.com](mailto:mario.benitezprian@gmail.com) | [GitHub](https://github.com/mario-benitez-prian)
+

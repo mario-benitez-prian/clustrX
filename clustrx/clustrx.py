@@ -163,6 +163,18 @@ def _detect_needed_columns(format, evalue, pident, coverage, custom_cols):
         if evalue is not None: needed_cols.append(4)
         col_names = {0: 't', 2: 'q', 5: 'bitscore', 4: 'evalue'}
         schema = None 
+    elif format == 'mmseqs':
+        # MMseqs2 standard search output (usually matches BLAST columns)
+        needed_cols = [0, 1, 11]
+        if evalue is not None: needed_cols.append(10)
+        if pident is not None or coverage is not None: needed_cols.append(2)
+        if coverage is not None: needed_cols.append(3)
+        
+        col_names = {0: 'q', 1: 't', 11: 'bitscore'}
+        if evalue is not None: col_names[10] = 'evalue'
+        if 2 in needed_cols: col_names[2] = 'pident'
+        if 3 in needed_cols: col_names[3] = 'length'
+        schema = {f'column_{i+1}': pl.String if i in [0, 1] else (pl.Int32 if i == 3 else pl.Float64) for i in needed_cols}
     elif format == 'custom':
         if not custom_cols or 'q' not in custom_cols or 't' not in custom_cols or 'bitscore' not in custom_cols:
             raise ValueError("Custom format requires: q, t, bitscore columns.")
@@ -252,12 +264,12 @@ def _apply_scientific_filters(df, lengths_df, evalue, bitscore, pident, coverage
         c_lens = m_lens.clip(upper_bound=500).cast(pl.Float32)
         
         if coverage is not None:
-            # UMBERAL DINÁMICO: t_cov = 1.0 - (L_max / 600) clamped [0.4, 0.8]
-            t_cov = (pl.lit(1.0) - (c_lens / 600.0)).clip(0.4, 0.8) if coverage == 'dynamic' else pl.lit(float(coverage), dtype=pl.Float32)
+            
+            t_cov = (pl.lit(0.4) + (pl.lit(50.0) / m_lens)).clip(0.4, 0.8) if coverage == 'dynamic' else pl.lit(float(coverage), dtype=pl.Float32)
             cov_mask = (pl.col('length') / m_lens) >= t_cov
             
             if pident_override is not None and 'pident' in df.columns:
-                rescue_mask = (pl.col('pident') >= pident_override) & (m_lens >= 20)
+                rescue_mask = (pl.col('pident') >= pident_override) & (m_lens >= 10)
                 cov_mask = cov_mask | rescue_mask
             
             df = df.filter(cov_mask)
@@ -380,21 +392,26 @@ def read_fasta(fasta_file):
 
 def write_clusters(components, sequences, outdir_clusters, outdir_fastas, outdir_alignments=None):
     os.makedirs(outdir_clusters, exist_ok=True)
-    os.makedirs(outdir_fastas, exist_ok=True)
-    if outdir_alignments: os.makedirs(outdir_alignments, exist_ok=True)
+    if sequences is not None:
+        os.makedirs(outdir_fastas, exist_ok=True)
+        if outdir_alignments: os.makedirs(outdir_alignments, exist_ok=True)
+        
     for i, comp in enumerate(components, start=1):
         with open(Path(outdir_clusters) / f"cluster_{i}.txt", "w") as cf:
             cf.write("\n".join(comp) + "\n")
-        fasta_file = Path(outdir_fastas) / f"cluster_{i}.fasta"
-        with open(fasta_file, "w") as ff:
-            found = 0
-            for seq_id in comp:
-                seq = sequences.get(seq_id)
-                if seq:
-                    ff.write(f">{seq_id}\n{seq}\n"); found += 1
-        if outdir_alignments and found > 1:
-            try:
-                cmd = ["mafft", "--auto", str(fasta_file)]
-                with open(Path(outdir_alignments) / f"cluster_{i}.fasta", "w") as out:
-                    subprocess.run(cmd, stdout=out, stderr=subprocess.PIPE, check=True)
-            except: pass
+            
+        if sequences is not None:
+            fasta_file = Path(outdir_fastas) / f"cluster_{i}.fasta"
+            # Filter sequences that exist in the dictionary
+            valid_hits = [(sid, sequences.get(sid)) for sid in comp if sequences.get(sid)]
+            found = len(valid_hits)
+            
+            with open(fasta_file, "w") as ff:
+                for seq_id, seq in valid_hits:
+                    ff.write(f">{seq_id}\n{seq}\n")
+            if outdir_alignments and found > 1:
+                try:
+                    cmd = ["mafft", "--auto", str(fasta_file)]
+                    with open(Path(outdir_alignments) / f"cluster_{i}.fasta", "w") as out:
+                        subprocess.run(cmd, stdout=out, stderr=subprocess.PIPE, check=True)
+                except: pass

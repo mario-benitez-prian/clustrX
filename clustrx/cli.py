@@ -15,28 +15,30 @@ def main():
     """
     parser = argparse.ArgumentParser(
         description=(
-        "clustRX: Parallel-ready sequence clustering with scientific rigor.\n\n"
-        "Leverages Polars for high-speed hit parsing and Igraph for community detection.\n"
-        "Author: Mario Benítez-Prián | Please cite clustRX if used in your research.\n"
+        "clustRX: Robust and Sensitive Sequence Clustering using Similarity Networks and Leiden Community Detection\n\n"
+        "A decoupled clustering framework supporting BLAST, DIAMOND, HMMER, and MMseqs2 outputs.\n"
+        "Features Adaptive Dynamic Coverage filtering and high-speed parsing via Polars & igraph.\n\n"
+        "Authors: Mario Benítez-Prián and Diego San Mauro | Please cite clustrX if used in your research.\n"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument("-i", "--input", required=True, help="Input hits file (BLAST tabular or HMMER tblout)")
+    parser.add_argument("-o", "--outdir", default="clustrx_output", help="Output directory")
+    parser.add_argument("-c", "--coverage", help="Alignment coverage filter (0.0-1.0 or 'dynamic'). Percentage of the longest sequence covered by the alignment.")
     parser.add_argument("-fmt", "--format", choices=["blast", "hmmer", "domhmmer", "tblhmmer", "mmseqs", "custom"], help="Input format (optional, auto-detected if not provided)")
     parser.add_argument("-f", "--fasta", required=True, help="FASTA file with all sequences")
     parser.add_argument("-min", "--min-cluster-size", type=int, default=2, help="Minimum cluster size to output (default=2).")
     parser.add_argument("-e", "--evalue", type=float, help="E-value threshold for filtering hits (default: no filter)")
     parser.add_argument("-b", "--bitscore", type=float, help="Bitscore threshold for filtering hits (default: no filter)")
     parser.add_argument("-pi", "--pidentity", type=float, help="Minimum percentage identity (0-100) (default: no filter)")
-    parser.add_argument("-c", "--coverage", help="Alignment coverage filter (0.0-1.0 or 'dynamic'). Percentage of the longest sequence covered by the alignment.")
     parser.add_argument("--id-override", type=float, default=90.0, help="Identity threshold to override coverage filter (default: 90.0).")
     parser.add_argument("--seed", type=int, help="Seed for reproducibility (default: None)")
     parser.add_argument("--resolution", type=float, default=1.0, help="Resolution parameter for Leiden algorithm (default: 1.0)")
-    parser.add_argument("--outdir", default="clustrx_output", help="Output directory")
     parser.add_argument("--mafft", action="store_true", help="Automatically run MAFFT on generated clusters (requires MAFFT installed)")
+    parser.add_argument("--write-fasta", action="store_true", help="Generate FASTA files and alignments for clusters (default: False).")
     
     # Custom format groups
-    custom_group = parser.add_argument_group('Custom Format Options', 'Specify 0-indexed column numbers for custom tabular inputs.')
+    custom_group = parser.add_argument_group('Custom Format Options', 'Specify 0-indexed column numbers for custom tabular inputs (column 1 in file is column 0).')
     custom_group.add_argument("--col-query", type=int, help="Column index for query ID")
     custom_group.add_argument("--col-target", type=int, help="Column index for target ID")
     custom_group.add_argument("--col-bitscore", type=int, help="Column index for alignment score (bitscore)")
@@ -119,9 +121,12 @@ def main():
     )
 
     # OUTPUT PHASE: Write clusters to disk.
-    # Only load the FULL sequences (ATGCs) here at the very end.
-    from .clustrx import read_fasta
-    sequences = read_fasta(args.fasta)
+    # Only load the FULL sequences (ATGCs) here if requested or needed for MAFFT.
+    if args.write_fasta or args.mafft:
+        from .clustrx import read_fasta
+        sequences = read_fasta(args.fasta)
+    else:
+        sequences = None
     
     out_clusters = Path(args.outdir) / "clusters"
     out_fastas = Path(args.outdir) / "fasta_files"
