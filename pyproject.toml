@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "clustrX"
 version = "0.1.6"
-description = "clustrX: graph-based clustering using Leiden community detection algorithm of sequences from BLAST, HMMER or other sequence similarity search results"
+description = "clustrX: Highly Robust and Sensitive Protein Clustering Using Similarity Networks and Leiden Community Detection"
 authors = [{ name = "Mario Benítez-Prián", email = "mario.benitezprian@gmail.com"}]
 license = { text = "MIT" }
 readme = "README.md"
