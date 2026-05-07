@@ -1,83 +1,114 @@
-# clustrX: High-Performance Graph-Based Sequence Clustering
+# clustrX: Highly Robust and Sensitive Protein Clustering
 
-[![Version](https://img.shields.io/badge/version-0.1.6-blue.svg)](https://pypi.org/project/clustrX/)
+[![Version](https://img.shields.io/badge/version-0.1.7-blue.svg)](https://pypi.org/project/clustrX/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
-**clustrX** is a high-performance Python tool designed for ultra-fast clustering of protein and nucleotide sequences using the **Leiden community detection algorithm**. 
-
-By modeling sequence homology as a weighted mathematical network, `clustrX` overcomes the limitations of traditional "greedy incremental" methods (like CD-HIT) and "single-linkage" network tools (like SiLiX), providing superior precision and biological coherence in complex evolutionary scenarios.
+**clustrX** is a high-performance framework designed to transform sequence similarity search results into biologically coherent protein families. By modeling homology as a weighted mathematical network and applying the **Leiden community detection algorithm**, `clustrX` provides a sensitive and robust solution for clustering sequences, especially in complex scenarios involving remote homology and short peptides.
 
 ---
 
-## 🔬 Scientific Core: Leiden vs. Single-Linkage
+## 🚀 Key Features
 
-Traditional graph-based clustering often relies on *Single-Linkage*, where a single similarity hit can bridge two unrelated groups. This leads to **fragmentation** or the creation of **giant, chimeric clusters** in the presence of:
-*   **Domain Bridges**: Unrelated protein families sharing a single common domain.
-*   **Chimeric Sequences**: Proteins with multiple, unrelated functional modules.
-*   **Highly Divergent Families**: Low-identity homologs that are missed by greedy methods.
-
-**clustrX** addresses this by using the **Leiden Algorithm**, which maximizes network *modularity*. It identifies densely connected communities rather than just simple links, allowing it to:
-1.  **Resolve Complex Architectures**: Correctly separate families even when they share a few domain-bridge hits.
-2.  **Ensure Taxonomic Purity**: Minimize the creation of taxonomically inconsistent "mixed" clusters.
-3.  **High Sensitivity**: Group divergent sequences (like AMPs, Toxins, and small peptides) that standard methods often break apart.
+*   **Leiden Community Detection**: Beyond simple links, `clustrX` identifies densely connected communities, ensuring high internal cohesion and preventing artificial family merging (e.g., due to domain bridges).
+*   **Agnostic Input**: Works with results from **BLAST**, **Diamond**, **MMseqs2**, and **HMMER**. Or others using the custom input option.
+*   **Dynamic Coverage Filter**: Our recommended approach to handle sequences of varying lengths to obtain the most reliable and biologically sound results.
+*   **Ultra-Fast Performance**: Powered by `Polars` (Rust-based) for data processing and `igraph` (C-based) for network analysis.
+*   **Integrated Workflow**: From similarity hits to Multiple Sequence Alignments (MSAs) in a single command.
 
 ---
 
-## 🚀 Technical Advantages
+## 📦 Installation
 
-*   **Ultra-High Speed (Polars Engine)**: All hit parsing and filtering is powered by `Polars`, a Rust-based DataFrame library. This allows `clustrX` to process millions of hits in seconds with minimal RAM usage.
-*   **Scalability (C-based igraph)**: Network operations are executed via `python-igraph`, enabling the analysis of massive homology networks where `NetworkX` would fail.
-*   **Scientific Filters**:
-    *   **Dynamic Coverage**: Automatically adjusts the alignment length requirement based on sequence size ($C_{threshold} = \text{clamp} \left( 1.0 - \frac{\min(L_{max}, 500)}{600} , 0.4, 0.8 \right)$).
-    *   **Bitscore, E-value, and Identity**: Multi-parameter edge filtering to refine the network before clustering.
-*   **Agnostic Input Parsing**: Supports BLAST tabular (`-outfmt 6`), HMMER `domtblout`, or any other tool via custom column mapping.
+You can install `clustrX` using two main methods. Note the difference in dependency management:
 
----
+### Option A: Via Conda (Recommended)
+This is the easiest way as it automatically installs all external dependencies, including **MAFFT** for alignments.
+```bash
+conda install -c bioconda clustrx
+```
 
-Currently available on **PyPI**. You can install it using `pip`:
-
+### Option B: Via Pip
+If you prefer `pip`, remember that you must **install MAFFT manually** on your system if you plan to use the `--mafft` option.
 ```bash
 pip install clustrX
 ```
 
-### Dependencies
-*   Python ≥ 3.8
-*   `polars`, `python-igraph`, `psutil`, `numpy`
+---
+
+## ⚙️ Input Formats & Requirements
+
+`clustrX` is designed to be a post-processing layer. It requires two main inputs:
+1.  **Similarity Hits**: A tabular file (BLAST-like or HMMER).
+2.  **Sequences**: A FASTA file containing the sequences referenced in the hits.
+
+### Using Diamond or MMseqs2
+If you use these tools, you **must** ensure the output is in **BLAST tabular format (outfmt 6)**:
+
+*   **Diamond**:
+    ```bash
+    diamond blastp -q query.fasta -d db.dmnd -o hits.tsv --outfmt 6
+    ```
+*   **MMseqs2**:
+    ```bash
+    mmseqs easy-search query.fasta target.fasta hits.tsv tmp --format-mode 0
+    ```
+
+### Using HMMER
+HMMER outputs require specific flags depending on the filtering level you need:
+
+*   **`domtblout` (Recommended)**: Use the `--domtblout` flag in `hmmsearch` or `phmmer`. This format provides alignment coordinates, which are **required** for using the **Dynamic Coverage** filter.
+    ```bash
+    hmmsearch --domtblout hits.domtblout profile.hmm database.fasta
+    ```
+*   **`tblout`**: Use the `--tblout` flag. Note that this format lacks coordinate information; therefore, **Dynamic Coverage cannot be applied** (only E-value and Bitscore filters will be used).
+    ```bash
+    hmmsearch --tblout hits.tblout profile.hmm database.fasta
+    ```
 
 ---
 
-## 📖 Quick Start
+## 🧬 The Power of Dynamic Coverage
 
-### Basic Clustering (BLAST / MMseqs2 / Diamond)
-```bash
-clustrx -i hits.blast -f sequences.fasta --outdir results
-```
+We strongly recommend using the **Dynamic Coverage** mode (`--coverage dynamic`) for most scientific applications. For more information about this, please, read the paper.
 
-### Advanced Scientific Clustering (HMMER + Dynamic Coverage)
-```bash
-clustrx -i hits.domtblout -f sequences.fasta --coverage dynamic --outdir results_hmmer
-```
-
-### Output Parameters
-`clustrX` produces a clean output structure ready for downstream analysis:
-*   **`clusters/`**: TXT files containing the IDs of sequences in each family.
-*   **`fasta_files/`**: Automatically extracted FASTA files for each cluster.
-*   **`alignments/`**: (Optional) Multiple Sequence Alignments (MSAs) orchestrated via **MAFFT**.
+Standard clustering methods often use fixed thresholds that fail to resolve relationships between sequences of very different sizes. Our dynamic filter uses a **hyperbolic decay function** (calibrated with a 50-residue scale factor) that:
+1.  Increases stringency for **short peptides** (up to 0.8 coverage) to filter out statistical noise.
+2.  Gradually relaxes for **larger proteins** (down to 0.4 coverage) to maximize sensitivity in detecting remote homology.
 
 ---
 
-## 🧬 Validation Scenarios
-The scientific robustness of `clustrX` has been validated against Gold Standard datasets (Pfam Seed), extreme complexity cases (AMPs/Toxins), and ground-truth numerical simulations, consistently outperforming standard methods in Precisión, Recall, and Jaccard Index.
+## 🛠️ Workflow & Usage
+
+The `clustrX` pipeline follows a clear 3-step logic:
+
+1.  **Filter**: Hits are filtered based on E-value, Bitscore, and (recommended) Dynamic Coverage.
+2.  **Cluster**: A similarity network is built where edges are weighted by Bitscore, then partitioned using Leiden algorithm.
+3.  **Output**: Results are exported. **Note: Fasta generation and alignments are optional.**
+
+### Example: Recommended Scientific Run
+```bash
+clustrx -i hits.tsv -f sequences.fasta --coverage dynamic --write-fasta --mafft --outdir results_full
+```
+*   `--write-fasta`: (Optional) Creates a FASTA file for each generated cluster.
+*   `--mafft`: (Optional) Automatically performs Multiple Sequence Alignment for each cluster.
+
+---
+
+## 💡 Use Cases
+
+*   **Protein Family Discovery**: Organizing large proteomes into evolutionarily related groups.
+*   **Short Peptide Classification**: Specifically tuned for the discovery of **Antimicrobial Peptides (AMPs)**, toxins, signaling peptides or others.
+*   **Remote Homology Exploration**: Identifying relationships in the "twilight zone" (identity < 30%) where traditional greedy methods fragment families.
+*   **Domain-Aware Clustering**: Using HMMER `domtblout` inputs to cluster sequences based on specific functional domains.
 
 ---
 
 ## 📝 Citation
 If you use **clustrX** in your research, please cite:
-> Benítez-Prián, M. (2024). clustrX: High-performance graph clustering for sequence similarity networks.
+> Benítez-Prián, M. & San Mauro, D. (2024). clustrX: Highly Robust and Sensitive Protein Clustering Using Similarity Networks and Leiden Community Detection.
 
 ## 👤 Authors
 **Mario Benítez-Prián** & **Diego San Mauro**
 
 Contact: [mario.benitezprian@gmail.com](mailto:mario.benitezprian@gmail.com) | [GitHub](https://github.com/mario-benitez-prian)
-

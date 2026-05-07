@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "clustrX"
-version = "0.1.6"
+version = "0.1.7"
 description = "clustrX: Highly Robust and Sensitive Protein Clustering Using Similarity Networks and Leiden Community Detection"
 authors = [{ name = "Mario Benítez-Prián", email = "mario.benitezprian@gmail.com"}]
 license = { text = "MIT" }
@@ -29,6 +29,9 @@ dependencies = [
     "numpy>=1.20.0",
     "psutil>=5.8.0",
 ]
+
+[tool.setuptools]
+license-files = []
 
 [project.optional-dependencies]
 test = [
