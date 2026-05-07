@@ -42,6 +42,12 @@ pip install clustrX
 1.  **Similarity Hits**: A tabular file (BLAST-like or HMMER).
 2.  **Sequences**: A FASTA file containing the sequences referenced in the hits.
 
+### Using BLAST
+`clustrX` works natively with the default tabular output of BLAST (`-outfmt 6`).
+```bash
+blastp -query sequences.fasta -db database -out hits.tsv -outfmt 6
+```
+
 ### Using Diamond or MMseqs2
 If you use these tools, you **must** ensure the output is in **BLAST tabular format (outfmt 6)**:
 
@@ -106,7 +112,7 @@ clustrx -i hits.tsv -f sequences.fasta --coverage dynamic --write-fasta --mafft 
 
 ## 📝 Citation
 If you use **clustrX** in your research, please cite:
-> Benítez-Prián, M. & San Mauro, D. (2024). clustrX: Highly Robust and Sensitive Protein Clustering Using Similarity Networks and Leiden Community Detection.
+> Benítez-Prián, M. & San Mauro, D. (2026). clustrX: Highly Robust and Sensitive Protein Clustering Using Similarity Networks and Leiden Community Detection.
 
 ## 👤 Authors
 **Mario Benítez-Prián** & **Diego San Mauro**
