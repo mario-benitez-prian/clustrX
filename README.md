@@ -28,11 +28,26 @@ This is the easiest way as it automatically installs all external dependencies, 
 conda install -c bioconda clustrx
 ```
 
-### Option B: Via Pip
-If you prefer `pip`, remember that you must **install MAFFT manually** on your system if you plan to use the `--mafft` option.
-```bash
-pip install clustrX
-```
+### Option B: Via Pip (Using a Virtual Environment)
+To avoid conflicts with other packages and ensure the `clustrx` command is correctly recognized by your system (avoiding PATH issues), we highly recommend using a virtual environment:
+
+1.  **Create a new environment**:
+    ```bash
+    python -m venv clustrx_env
+    ```
+2.  **Activate it**:
+    *   **Windows**: `clustrx_env\Scripts\activate`
+    *   **Linux/macOS**: `source clustrx_env/bin/activate`
+3.  **Install**:
+    ```bash
+    pip install clustrX
+    ```
+
+> [!TIP]
+> If you still encounter issues running the `clustrx` command, you can always launch it directly via Python:
+> `python -m clustrx --help`
+
+*Note: If you use Pip, remember that you must **install MAFFT manually** on your system if you plan to use the `--mafft` option.*
 
 ---
 
