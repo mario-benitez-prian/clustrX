@@ -44,8 +44,8 @@ To avoid conflicts with other packages and ensure the `clustrx` command is corre
     ```
 
 > [!TIP]
-> If you still encounter issues running the `clustrx` command, you can always launch it directly via Python:
-> `python -m clustrx --help`
+> **If the `clustrx` command is not recognized** after installation (common on Windows), it is likely because the installation directory is not in your system's PATH. You can either add it manually or use the following foolproof method:
+> `python -m clustrx [arguments]`
 
 *Note: If you use Pip, remember that you must **install MAFFT manually** on your system if you plan to use the `--mafft` option.*
 
