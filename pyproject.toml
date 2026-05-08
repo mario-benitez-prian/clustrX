@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "clustrX"
-version = "0.1.9"
+version = "1.0.0"
 description = "clustrX: Highly Robust and Sensitive Protein Clustering Using Similarity Networks and Leiden Community Detection"
 authors = [{ name = "Mario Benítez-Prián", email = "mario.benitezprian@gmail.com"}]
 license = { text = "MIT" }

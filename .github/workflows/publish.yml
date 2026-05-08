@@ -17,7 +17,7 @@ jobs:
 
     environment:
       name: pypi
-      url: https://test.pypi.org/p/clustrX
+      url: https://pypi.org/p/clustrX
 
     steps:
       - name: Checkout Source Code
@@ -34,8 +34,6 @@ jobs:
       - name: Build Source and Wheel distributions
         run: python -m build
 
-      # The official PyPA action for Trusted Publishing
-      - name: Publish package to TestPyPI
+      # The official PyPA action for Trusted Publishing to PyPI
+      - name: Publish package to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
