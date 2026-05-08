@@ -1,6 +1,6 @@
 # clustrX: Highly Robust and Sensitive Protein Clustering
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://pypi.org/project/clustrX/)
+[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](https://pypi.org/project/clustrX/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
